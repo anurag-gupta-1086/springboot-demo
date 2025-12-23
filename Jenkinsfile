@@ -11,10 +11,10 @@ pipeline {
         JAR_NAME = "springboot-demo-0.0.1-SNAPSHOT.jar"
         WORKSPACE_JAR = "target/springboot-demo-0.0.1-SNAPSHOT.jar"
 
-        DEPLOY_DIR = "/opt/springboot-demo"
-        CURRENT_JAR = "/opt/springboot-demo/current.jar"
-        BACKUP_JAR = "/opt/springboot-demo/backup.jar"
-        LOG_FILE = "/opt/springboot-demo/app.log"
+        DEPLOY_DIR = "/Users/anuraggupta/deploy/springboot-demo"
+        CURRENT_JAR = "/Users/anuraggupta/deploy/springboot-demo/current.jar"
+        BACKUP_JAR = "/Users/anuraggupta/deploy/springboot-demo/backup.jar"
+        LOG_FILE = "/Users/anuraggupta/deploy/springboot-demo/app.log"
     }
 
     stages {
@@ -86,13 +86,12 @@ pipeline {
 
             sh '''
             set +e
-
             pkill -f springboot-demo || true
 
             if [ -f "$BACKUP_JAR" ]; then
                 echo "Rolling back to previous version..."
                 export JENKINS_NODE_COOKIE=dontKillMe
-                nohup java -jar $BACKUP_JAR > /opt/springboot-demo/rollback.log 2>&1 &
+                nohup java -jar $BACKUP_JAR > $DEPLOY_DIR/rollback.log 2>&1 &
                 echo "Rollback completed."
             else
                 echo "No backup available. Rollback skipped."
