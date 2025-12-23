@@ -9,10 +9,12 @@ pipeline {
     environment {
         APP_NAME = "springboot-demo"
         JAR_NAME = "springboot-demo-0.0.1-SNAPSHOT.jar"
-        TARGET_DIR = "target"
-        CURRENT_JAR = "springboot-demo-current.jar"
-        BACKUP_JAR = "springboot-demo-backup.jar"
-        LOG_FILE = "app.log"
+        WORKSPACE_JAR = "target/springboot-demo-0.0.1-SNAPSHOT.jar"
+
+        DEPLOY_DIR = "/opt/springboot-demo"
+        CURRENT_JAR = "/opt/springboot-demo/current.jar"
+        BACKUP_JAR = "/opt/springboot-demo/backup.jar"
+        LOG_FILE = "/opt/springboot-demo/app.log"
     }
 
     stages {
@@ -47,10 +49,11 @@ pipeline {
                 sh '''
                 set -e
 
+                echo "Preparing deploy directory..."
+                mkdir -p $DEPLOY_DIR
+
                 echo "Stopping existing application (if any)..."
                 pkill -f springboot-demo || true
-
-                cd $TARGET_DIR
 
                 if [ -f "$CURRENT_JAR" ]; then
                     echo "Backing up current version..."
@@ -58,15 +61,20 @@ pipeline {
                 fi
 
                 echo "Deploying new version..."
-                cp $JAR_NAME $CURRENT_JAR
+                cp $WORKSPACE_JAR $CURRENT_JAR
 
                 echo "Starting application..."
                 export JENKINS_NODE_COOKIE=dontKillMe
                 nohup java -jar $CURRENT_JAR > $LOG_FILE 2>&1 &
 
                 sleep 5
-                echo "Application started. Showing last logs:"
-                tail -n 20 $LOG_FILE || true
+
+                if ps -ef | grep current.jar | grep -v grep > /dev/null; then
+                    echo "Application started successfully"
+                else
+                    echo "Application failed to start"
+                    exit 1
+                fi
                 '''
             }
         }
@@ -79,15 +87,12 @@ pipeline {
             sh '''
             set +e
 
-            echo "Stopping failed application..."
             pkill -f springboot-demo || true
-
-            cd $TARGET_DIR
 
             if [ -f "$BACKUP_JAR" ]; then
                 echo "Rolling back to previous version..."
                 export JENKINS_NODE_COOKIE=dontKillMe
-                nohup java -jar $BACKUP_JAR > rollback.log 2>&1 &
+                nohup java -jar $BACKUP_JAR > /opt/springboot-demo/rollback.log 2>&1 &
                 echo "Rollback completed."
             else
                 echo "No backup available. Rollback skipped."
