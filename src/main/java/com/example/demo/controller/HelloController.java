@@ -10,10 +10,10 @@ import java.util.List;
 @RequestMapping("/api")
 public class HelloController {
 
-    // @PostConstruct
-    // public void init() {
-    //     throw new RuntimeException("Startup failure for Jenkins rollback testing");
-    // }
+    @PostConstruct
+    public void init() {
+        throw new RuntimeException("Startup failure for Jenkins rollback testing");
+    }
 
     @GetMapping("/hello")
     public String hello() {
