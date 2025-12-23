@@ -40,13 +40,7 @@ pipeline {
 
         stage('Run Application') {
             steps {
-                sh '''
-                echo "Stopping old app if running..."
-                pkill -f springboot-demo || true
-
-                echo "Starting application..."
-                nohup java -jar target/springboot-demo-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-                '''
+                sh 'java -jar target/springboot-demo-0.0.1-SNAPSHOT.jar'
             }
         }
     }
