@@ -45,6 +45,7 @@ pipeline {
                 pkill -f springboot-demo || true
 
                 echo "Starting application..."
+                export BUILD_ID=dontKillMe
                 nohup java -jar target/springboot-demo-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
                 '''
             }
