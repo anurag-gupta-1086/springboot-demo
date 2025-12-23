@@ -10,6 +10,11 @@ import java.util.List;
 @RequestMapping("/api")
 public class HelloController {
 
+    @PostConstruct
+    public void init() {
+        throw new RuntimeException("Startup failure for Jenkins rollback testing");
+    }
+
     @GetMapping("/hello")
     public String hello() {
         return "Spring Boot backend is running successfully!";
